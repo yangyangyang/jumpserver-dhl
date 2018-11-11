@@ -1,5 +1,9 @@
 __author__ = 'Administrator'
+import subprocess, random, string
 from django.contrib.auth import authenticate
+from django.conf import settings
+from audit import models
+from audit.backend import ssh_interactive
 
 class UserShell(object):
     """用户登录跳板机后的shell"""
@@ -29,10 +33,10 @@ class UserShell(object):
             while True:
                 host_groups = self.user.account.host_groups.all()
                 for index,group in enumerate(host_groups):
-                    print("%s.\t%s[%s台]" %(index,group,group.host_user_binds.count()))
-                print("%s.\t未分组机器[%s台]" % (len(host_groups), self.user.account.host_user_binds.count()))
+                    print("%s.\t%s[%s]" %(index,group,group.host_user_binds.count()))
+                print("%s.\t未分组机器[%s]" % (len(host_groups), self.user.account.host_user_binds.count()))
                 try:
-                    choice = input("select group>:").strip()
+                    choice = input("请选择主机组:").strip()
                     if choice.isdigit():
                         choice = int(choice)
                         host_bind_list = None
@@ -45,15 +49,31 @@ class UserShell(object):
                             while True:
                                 for index, host in enumerate(host_bind_list):
                                     print("%s.\t%s" % (index, host))
-                                choice2 = input("select host>:").strip()
+                                choice2 = input("请选择主机(按q 返回上一级):").strip()
                                 if choice2.isdigit():
                                     choice2 = int(choice2)
+                                    print(choice2)
                                     if choice2 >= 0 and choice2 < len(host_bind_list):
                                         selected_host = host_bind_list[choice2]
-                                        print("selectd host", selected_host)
 
-                                elif choice2 == 'b':
+                                        ssh_interactive.ssh_session(selected_host,self.user)
+
+                                        # s = string.ascii_lowercase + string.digits
+                                        # random_tag = ''.join(random.sample(s,10))
+                                        # session_obj = models.SessionLog.objects.create(account=self.user.account,host_user_bind=selected_host)
+                                        # # 修改openssh源码（ssh.c）
+                                        # cmd = "sshpass -p %s ssh %s@%s -p %s -o StrictHostKeyChecking=no" %(selected_host.host_user.password,selected_host.host_user.username,selected_host.host.ip_addr,selected_host.host.port )
+                                        #
+                                        # # start strace, and sleep 1 random_tag,session_obj.id
+                                        # session_tracker_script = "sh %s %s %s " %(settings.SESSION_TRACKER_SCRIPT,random_tag,session_obj.id)
+                                        # session_tracker_obj = subprocess.Popen(session_tracker_script, shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                                        #
+                                        # ssh_channel = subprocess.run(cmd,shell=True)
+                                        # print(session_tracker_obj.stdout.read(), session_tracker_obj.stderr.read())
+
+                                elif choice2 == 'q':
                                     break
+
                 except KeyboardInterrupt as e:
                     pass
 
