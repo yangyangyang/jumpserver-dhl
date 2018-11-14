@@ -64,7 +64,7 @@ def posix_shell(chan, session_obj):
                 if len(x) == 0:
                     break
                 if x == '\r':
-                    models.AuditLog.objects.create(session=session_obj,comand=cmd)
+                    models.AuditLog.objects.create(session=session_obj,command=cmd)
                     cmd = ''
                 else:
                     cmd += x
