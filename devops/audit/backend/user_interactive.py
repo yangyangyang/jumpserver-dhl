@@ -1,5 +1,5 @@
 __author__ = 'Administrator'
-import subprocess, random, string
+import subprocess, random, string, datetime
 from django.contrib.auth import authenticate
 from django.conf import settings
 from audit import models
@@ -10,6 +10,25 @@ class UserShell(object):
     def __init__(self, sys_argv):
         self.sys_argv = sys_argv
         self.user = None
+
+    def token_auth(self):
+        count = 0
+        while count < 3:
+            user_input = input("请输入token:").strip()
+            if len(user_input) == 0:
+                return
+            if len(user_input) != 12:
+                print("token长度为12位")
+            else:
+                time_obj = datetime.datetime.now() - datetime.timedelta(seconds=1800)  # 30min ago
+                token_obj = models.Token.objects.filter(val=user_input,date__gt=time_obj).first()
+                if token_obj:
+                    # token_obj = token_objs
+                    if token_obj.val == user_input:
+                        self.user = token_obj.account.user
+                        return token_obj
+            count += 1
+
 
     def auth(self):
         count = 0
@@ -28,6 +47,10 @@ class UserShell(object):
 
     def start(self):
         """启动交互程序"""
+        token_obj = self.token_auth()
+        if token_obj:
+            ssh_interactive.ssh_session(token_obj.host_user_bind, self.user)
+            exit()
         if self.auth():
             # print(self.user.account.host_user_binds.all())
             while True:
@@ -36,7 +59,7 @@ class UserShell(object):
                     print("%s.\t%s[%s]" %(index,group,group.host_user_binds.count()))
                 print("%s.\t未分组机器[%s]" % (len(host_groups), self.user.account.host_user_binds.count()))
                 try:
-                    choice = input("请选择主机组:").strip()
+                    choice = input("请选择主机组(exit/quit 退出):").strip()
                     if choice.isdigit():
                         choice = int(choice)
                         host_bind_list = None
@@ -73,6 +96,8 @@ class UserShell(object):
 
                                 elif choice2 == 'q':
                                     break
+                    if choice == 'quit' or choice == 'exit':
+                        break
 
                 except KeyboardInterrupt as e:
                     pass

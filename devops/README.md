@@ -1,4 +1,5 @@
 # https://github.com/317828332/LuffyAudit/tree/master/audit
+# https://github.com/triaquae/CrazyEye
 1、安装shellinbox
    yum -y install git openssl-devel pam-devel zlib-devel autoconf automake libtool
    git clone https://github.com/shellinabox/shellinabox.git && cd shellinabox

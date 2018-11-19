@@ -3,8 +3,26 @@
 
 
 {% block content-container %}
-    <!--{% block page-title-text %}主机列表{% endblock %}-->
-    <h1 class="page-header text-overflow">主机列表</h1>
+    <!--{% csrf_token %}-->
+    <!--Page Title-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <div id="page-title">
+        <h1 class="page-header text-overflow">主机列表</h1>
+
+        <!--Searchbox-->
+        <div class="searchbox">
+            <div class="input-group custom-search-form">
+                <input type="text" class="form-control" placeholder="Search..">
+                <span class="input-group-btn">
+                    <button class="text-muted" type="button"><i class="pli-magnifi-glass"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    <!--End page title-->
+
+
    <!--Breadcrumb-->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
     <ol class="breadcrumb">
@@ -44,6 +62,7 @@
                             <th>端口</th>
                             <th>用户名</th>
                             <th>操作</th>
+                            <th>Token</th>
                         </tr>
                     </thead>
                     <tbody id="hostlist">
@@ -54,14 +73,22 @@
     </div>
 
 <script>
+    function GetToken(self,bind_host_id) {
+        $.post("{% url 'get_token' %}", {'bind_host_id':bind_host_id, 'csrfmiddlewaretoken':"{{ csrf_token }}"}, function (callback) {
+//            console.log(callback)
+            var data = JSON.parse(callback)
+            $(self).parent().next().text(data.token);
+        }); // end post
+    }
+
     function GetHostlist(gid,self) {
         $.get("{% url 'get_host_list' %}",{'gid':gid},function (callback) {
             var data = JSON.parse(callback)
             var trs = ''
-            console.log(data)
+//            console.log(data)
             $.each(data,function (index,item) {
                 var tr = "<tr><td>" + item.host__hostname + "</td><td>" + item.host__ip_addr + "</td><td>" + item.host__idc__name
-                         + "</td><td>" + item.host__port + "</td><td>" + item.host_user__username + "</td><td>登录</td></tr>"
+                         + "</td><td>" + item.host__port + "</td><td>" + item.host_user__username + "</td><td><a class='btn btn-info' onclick=GetToken(this,'"+item.id+"')>Token</a>登录</td><td></td></tr>"
                 trs += tr
             })
             $("#hostlist").html(trs);

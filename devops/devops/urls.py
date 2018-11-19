@@ -23,6 +23,11 @@ urlpatterns = [
     url(r'^login/$', views.Login),
     url(r'^logout/$', views.Logout),
     url(r'^hostlist/$', views.hostList, name="host_list"),
+    url(r'^multitask/$', views.multiTask, name="multitask"),
+    url(r'^multitask/cmd/$', views.multiCmd, name="multi_cmd"),
+    url(r'^multitask/result/$', views.multiCmdResult, name="get_task_result"),
     url(r'^api/hostlist/$', views.GetHostList, name="get_host_list"),
+    url(r'^api/token/$', views.getToken, name="get_token"),
+
 
 ]

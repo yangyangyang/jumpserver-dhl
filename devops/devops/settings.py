@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'devops.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'devops',
+        'NAME': 'devops_1',
         'USER': 'root',
         'PASSWORD': 'root123',
         'HOST': '127.0.0.1',
@@ -116,7 +116,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -130,3 +130,8 @@ STATICFILES_DIRS = (
 LOGIN_URL = '/login/'
 
 SESSION_TRACKER_SCRIPT = os.path.join(BASE_DIR,'audit/backend/session_tracker.sh')
+
+MULTI_TASK_SCRIPT = os.path.join(BASE_DIR,'multitask.py')
+
+# set multitask.py  process_num
+MaxTaskProcesses = 10
